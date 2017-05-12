@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Eysenk</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js" type="text/javascript"></script>
+  <link rel="stylesheet" href="css/vendor/bootstrap.css">
+  <link rel="stylesheet" href="css/vendor/bootstrap-theme.css">
+</head>
+<body>
+  <div class="modal">
+    <div class="panel">
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-12">
+            <h3>Resultado:</h3>
+            <ul class="resultados-list">
+
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="telon">
+    </div>
+  </div>
+  <header class="container">
+    <div class="row centrar titulo">
+      <div class="col-xs-12">
+        <h3>INVENTARIO DE PERSONALIDAD EYSENCK</h3>
+      </div>
+      <div class="col-xs-12" style="text-align: justify; padding: 2em;">
+        <p>
+          Aquí tiene algunas preguntas sobre el modo como usted se comporta, siente y actúa. Después de cada pregunta, conteste con un “SI” o con un “NO” según sea su caso.</p>
+        <p>Trabaje rápidamente  y no emplee mucho tiempo en cada pregunta; queremos su primera reacción, en un proceso de pensamiento prolongado.</p>
+<p>El cuestionario total no debe de tomar más que unos pocos minutos. Asegúrese  de no omitir alguna pregunta.</p><p>Ahora comience. Trabaje rápidamente y recuerde contestar todas las preguntas. No hay contestaciones “correctas” ni “incorrectas” y esto no es un test de inteligencia o habilidad, sino simplemente una medida de la forma como usted se comporta.</p>
+        </p>
+      </div>
+    </div>
+  </header>
+  <div class="container">
+    <form id="frm" method="get">
+      <section id="section" class="contenido">
+        <div class="row">
+          <div class="col-xs-12 centrar">
+            <div class="loader" id="loader-1"></div>
+          </div>
+        </div>
+      </section>
+      <div class="row">
+        <div class="col-xs-12">
+          <div class='input-group centrar enviar-group'>
+            <input type='submit' value="Finalizar" class="btn btn-primary boton-enviar ocultar">
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <script src="js/scripts.js" type="text/javascript"></script>
+  <script>
+   var resultados = {};
+
+ $(document).ready(function () {
+    $.getJSON( "includes/db.json", function( data ) {
+      //console.log(data);      
+      var articulo = "";
+     $.each( data, function( key, val ) {
+       var elem = $(".contenido");
+       var keys = val.keys;
+       //console.log(keys);
+
+       var article =  $("<article><div class='row centrar pregunta'><div class='col-xs-2'><strong style='font-size: 1.5em;'>"+val.nro+"</strong></div><div class='col-xs-6'><h4 class='enunciado'>"+val.enunciado+"</h4></div><div class='col-xs-4'><div class='row'><div class='col-xs-6'><div class='input-group der'><label for='si_"+val.nro+"'>V</label>&nbsp;&nbsp;<input value='"+keys.valor+"' class='eleccion' id='si_"+val.nro+"' required type='radio' name='nro_"+val.nro+"' /></div></div><div class='col-xs-6 centrar'><div class='input-group izq'><label for='no_"+val.nro+"'>F</label>&nbsp;&nbsp;<input value='' class='eleccion' id='no_"+val.nro+"' required type='radio' name='nro_"+val.nro+"' /></div></div></div></div></div></article>");
+       elem.append(article);
+
+      });
+      $(".loader").addClass("ocultar");
+      $(".boton-enviar").removeClass("ocultar");
+    });
+// Interacción con los radiobutton
+    $(document).on("change", ".eleccion", function () {
+      var dato = $(this).val();
+      if (dato != "") {
+        resultados[$(this).attr("name")] = dato;
+      }else{
+        delete resultados[$(this).attr("name")];
+      };
+});
+// Enviar el formulario
+    $(document).on("submit", "#frm", function (e) {
+      e.preventDefault();
+      var obj = exportar();
+
+      $(".modal").addClass("show");
+         $("<li><strong>Inteligencia Verbal: </strong> "+obj["verbal"]+puntuar(obj["verbal"])+"</li>").appendTo(".resultados-list");
+        $("<li><strong>Inteligencia Lógico-Matemática: </strong> "+obj["logico"]+puntuar(obj["logico"])+"</li>").appendTo(".resultados-list");
+        $("<li><strong>Inteligencia visual espacial: </strong> "+obj["visual"]+puntuar(obj["visual"])+"</li>").appendTo(".resultados-list");
+        $("<li><strong>Inteligencia kinestesica corporal: </strong> "+obj["kinestesica"]+puntuar(obj["kinestesica"])+"</li>").appendTo(".resultados-list");
+        $("<li><strong>Inteligencia Musical-Rítmica: </strong> "+obj["musical"]+puntuar(obj["musical"])+"</li>").appendTo(".resultados-list");
+        $("<li><strong>Inteligencia intrapersonal: </strong> "+obj["intrapersonal"]+puntuar(obj["intrapersonal"])+"</li>").appendTo(".resultados-list");
+        $("<li><strong>Inteligencia interpersonal: </strong> "+obj["interpersonal"]+puntuar(obj["interpersonal"])+"</li>").appendTo(".resultados-list");
+
+});
+
+
+  $(document).on("click", ".telon", function(){
+    $(".modal").removeClass("show");
+    $(".resultados-list").html("");
+  });
+});
+
+function puntuar(num){
+  if (num == 5 ) {
+    return "<strong style='color: green;'> Sobresaliente</strong>";
+  }else if (num == 4 ) {
+    return "<strong style='color: orange;'> Marcada</strong>";
+  }else{
+    return "";
+  };
+
+}
+
+  function getRandom(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+ function fillAll(){
+    for (var i = 1; i <= 35; i++) {
+      var sino = getRandom(1, 2) == 1 ? "si" : "no";
+      var elem = sino+"_"+i
+      $("#"+elem).attr("checked", true);
+      var dato = $("#"+elem).val();
+      if (dato != "") {
+        resultados[$("#"+elem).attr("name")] = dato;
+      }else{
+        delete resultados[$("#"+elem).attr("name")];
+      };
+      //resultados["pos_"+i] = $("#"+elem1).data("baremos");
+    }
+    exportar();
+ }
+
+function exportar(){
+  var cat = {"verbal" : 0, "logico" : 0, "visual" : 0, "kinestesica" : 0, "musical" : 0, "intrapersonal" : 0, "interpersonal" : 0};
+  console.log(resultados)
+  $.each(resultados, function(k,v ){
+     cat[v] = cat[v]+1;
+  });
+  return cat;
+}
+
+  </script>
+</body>
+</html>
